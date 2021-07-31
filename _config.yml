@@ -7,7 +7,7 @@
 # https://learnxinyminutes.com/docs/yaml/
 
 title: The City Scraper
-description: An exploration of Data Science topics through the lens of City Data.
+description: An exploration of Data Science topics through the lens of city data.
 github_username: jmbahr
 # you can comment the below line out if your repo name is not different than your baseurl
 #github_repo: "the-city-scraper"
