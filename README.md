@@ -7,7 +7,7 @@
 https://jmbahr.github.io/the-city-scraper/
 
 # My Blog
-
+This blog aims to explore the world of Data Science using City Data as the foundation.
 
 _powered by [fastpages](https://github.com/fastai/fastpages)_
 
