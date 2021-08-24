@@ -1,0 +1,2855 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="twitter:card" content="summary_large_image" /><!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>Show Me the City Data | The City Scraper</title>
+<meta name="generator" content="Jekyll v4.1.1" />
+<meta property="og:title" content="Show Me the City Data" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="A tutorial for programatically reading Open Data from a Socrata database." />
+<meta property="og:description" content="A tutorial for programatically reading Open Data from a Socrata database." />
+<link rel="canonical" href="https://jmbahr.github.io/the-city-scraper/jupyter/2021/08/19/read-socrata.html" />
+<meta property="og:url" content="https://jmbahr.github.io/the-city-scraper/jupyter/2021/08/19/read-socrata.html" />
+<meta property="og:site_name" content="The City Scraper" />
+<meta property="og:image" content="https://jmbahr.github.io/images/cincy_skyline.jpeg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2021-08-19T00:00:00-05:00" />
+<script type="application/ld+json">
+{"datePublished":"2021-08-19T00:00:00-05:00","url":"https://jmbahr.github.io/the-city-scraper/jupyter/2021/08/19/read-socrata.html","@type":"BlogPosting","image":"https://jmbahr.github.io/images/cincy_skyline.jpeg","headline":"Show Me the City Data","dateModified":"2021-08-19T00:00:00-05:00","mainEntityOfPage":{"@type":"WebPage","@id":"https://jmbahr.github.io/the-city-scraper/jupyter/2021/08/19/read-socrata.html"},"description":"A tutorial for programatically reading Open Data from a Socrata database.","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/the-city-scraper/assets/css/style.css"><link type="application/atom+xml" rel="alternate" href="https://jmbahr.github.io/the-city-scraper/feed.xml" title="The City Scraper" /><link rel="shortcut icon" type="image/x-icon" href="/the-city-scraper/images/favicon.ico"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Primer/15.2.0/primer.css" integrity="sha512-xTz2ys4coGAOz8vuV1NcQBkgVmKhsSEtjbqyMJbBHRplFuvKIUo6xhLHpAyPt9mfR6twHJgn9OgVLuqOvjeBhg==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css" integrity="sha512-h7nl+xz8wgDlNM4NqKEM4F1NkIRS17M9+uJwIGwuo8vGqIl4BhuCKdxjWEINm+xyrUjNCnK5dCrhM0sj+wTIXw==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.js" integrity="sha512-/CMIhXiDA3m2c9kzRyd97MTb3MC6OVnx4TElQ7fkkoRghwDf6gi41gaT1PwF270W6+J60uTmwgeRpNpJdRV6sg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/contrib/auto-render.min.js" integrity="sha512-Do7uJAaHZm5OLrIv/yN4w0iG1dbu01kzdMNnFfu/mAqgUk6Nniv2JYHcwH+cNwjqgLcqcuBBk+JRvprLVI8azg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha512-0doc9hKxR3PYwso42RD1p5ySZpzzuDiOwMrdCEh2WdJZCjcmFKc/wEnL+z8fBQrnHoiNWbo+3fiGkOYXBdQp4A==" crossorigin="anonymous"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        renderMathInElement( document.body, {
+        delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "[%", right: "%]", display: true},
+            {left: "$", right: "$", display: false}
+        ]}
+        );
+    });
+    </script>
+
+
+<script>
+function wrap_img(fn) {
+    if (document.attachEvent ? document.readyState === "complete" : document.readyState !== "loading") {
+        var elements = document.querySelectorAll(".post img");
+        Array.prototype.forEach.call(elements, function(el, i) {
+            if (el.getAttribute("title") && (el.className != "emoji")) {
+                const caption = document.createElement('figcaption');
+                var node = document.createTextNode(el.getAttribute("title"));
+                caption.appendChild(node);
+                const wrapper = document.createElement('figure');
+                wrapper.className = 'image';
+                el.parentNode.insertBefore(wrapper, el);
+                el.parentNode.removeChild(el);
+                wrapper.appendChild(el);
+                wrapper.appendChild(caption);
+            }
+        });
+    } else { document.addEventListener('DOMContentLoaded', fn); }
+}
+window.onload = wrap_img;
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function(){
+    // add link icon to anchor tags
+    var elem = document.querySelectorAll(".anchor-link")
+    elem.forEach(e => (e.innerHTML = '<i class="fas fa-link fa-xs"></i>'));
+    });
+</script>
+</head>
+<body><header class="site-header">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/the-city-scraper/">The City Scraper</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/the-city-scraper/about/">About Me</a><a class="page-link" href="/the-city-scraper/search/">Search</a><a class="page-link" href="/the-city-scraper/categories/">Tags</a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Show Me the City Data</h1><p class="page-description">A tutorial for programatically reading Open Data from a Socrata database.</p><p class="post-meta post-meta-title"><time class="dt-published" datetime="2021-08-19T00:00:00-05:00" itemprop="datePublished">
+        Aug 19, 2021
+      </time>
+       • <span class="read-time" title="Estimated read time">
+    
+    
+      20 min read
+    
+</span></p>
+
+    
+      <p class="category-tags"><i class="fas fa-tags category-tags-icon"></i></i> 
+      
+        <a class="category-tags-link" href="/the-city-scraper/categories/#jupyter">jupyter</a>
+        
+      
+      </p>
+    
+
+    
+      
+        <div class="pb-5 d-flex flex-wrap flex-justify-end">
+          <div class="px-2">
+
+    <a href="https://github.com/jmbahr/the-city-scraper/tree/master/_notebooks/2021-08-19-read-socrata.ipynb" role="button" target="_blank">
+<img class="notebook-badge-image" src="/the-city-scraper/assets/badges/github.svg" alt="View On GitHub">
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://mybinder.org/v2/gh/jmbahr/the-city-scraper/master?filepath=_notebooks%2F2021-08-19-read-socrata.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/the-city-scraper/assets/badges/binder.svg" alt="Open In Binder"/>
+    </a>
+</div>
+
+          <div class="px-2">
+    <a href="https://colab.research.google.com/github/jmbahr/the-city-scraper/blob/master/_notebooks/2021-08-19-read-socrata.ipynb" target="_blank">
+        <img class="notebook-badge-image" src="/the-city-scraper/assets/badges/colab.svg" alt="Open In Colab"/>
+    </a>
+</div>
+        </div>
+      </header>
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <ul class="section-nav">
+<li class="toc-entry toc-h2"><a href="#In-this-Post">In this Post </a></li>
+<li class="toc-entry toc-h2"><a href="#Why-is-this-Important">Why is this Important </a></li>
+<li class="toc-entry toc-h2"><a href="#Setup">Setup </a></li>
+<li class="toc-entry toc-h2"><a href="#Finding-an-API-Endpoint">Finding an API Endpoint </a></li>
+<li class="toc-entry toc-h2"><a href="#Reading-in-Data-via-API">Reading in Data via API </a></li>
+<li class="toc-entry toc-h2"><a href="#Socrata-Query-Language-(SoQL)">Socrata Query Language (SoQL) </a>
+<ul>
+<li class="toc-entry toc-h3"><a href="#Example-1:-Simple-Filter">Example 1: Simple Filter </a></li>
+<li class="toc-entry toc-h3"><a href="#Example-2:-Date-Filter">Example 2: Date Filter </a></li>
+<li class="toc-entry toc-h3"><a href="#Example-3:-Toggling-Row-Limit">Example 3: Toggling Row Limit </a></li>
+<li class="toc-entry toc-h3"><a href="#Example-4:-Select-Subset-of-Columns">Example 4: Select Subset of Columns </a></li>
+<li class="toc-entry toc-h3"><a href="#Example-5:-Putting-it-All-Together-with-$query">Example 5: Putting it All Together with $query </a></li>
+</ul>
+</li>
+</ul><!--
+#################################################
+### THIS FILE WAS AUTOGENERATED! DO NOT EDIT! ###
+#################################################
+# file to edit: _notebooks/2021-08-19-read-socrata.ipynb
+-->
+
+<div class="container" id="notebook-container">
+        
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="In-this-Post">
+<a class="anchor" href="#In-this-Post" aria-hidden="true"><span class="octicon octicon-link"></span></a>In this Post<a class="anchor-link" href="#In-this-Post"> </a>
+</h2>
+<p>Let's bring some first post energy!  I am excited to kick off this blog with a post about accessing Open Data in an easy, programmatic manner.</p>
+<p>This notebook will demonstrate how to programatically read in Open Data from Socrata databases.  Socrata is a company commissioned by a large number of cities to host open data platforms.</p>
+<p>These Open Data platforms are searchable and most importantly the data can be queried via an API.  These queries can be quite simple, or more complex.  We will dive into examples of both and be querying data in no time!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Why-is-this-Important">
+<a class="anchor" href="#Why-is-this-Important" aria-hidden="true"><span class="octicon octicon-link"></span></a>Why is this Important<a class="anchor-link" href="#Why-is-this-Important"> </a>
+</h2>
+<p>Querying and accessing data is a fundamental step of any data science workflow.  The mechanics of accessing data can get very messy, especially when it comes to government data.  Examples of this messiness include manually downloading files and saving to a user-defined location, appending multiple Excel files, scraping PDFs, and the list goes on.  Bottom line: it can get MESSY.</p>
+<p>Luckily, the infrastructure provided by Socrata makes for a seamless experience that can be replicated by anyone with the Internet and Python.  You read that correctly, everything demonstrated in this post can be replicated with very little setup.  This is a huge perk for the sake of collaboration.  Additionally, in the event that an analysis needs to be re-run, perhaps on more recent data, the ability to query data programatically allows for minimal rework and minimal room for error.  Alright, enough hype let's get to it!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Setup">
+<a class="anchor" href="#Setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup<a class="anchor-link" href="#Setup"> </a>
+</h2>
+<p>Before we get rolling, it is important to be working in an environment with the necessary packages installed and available.  I like using Conda to manage environments (this sounds like a future blog post) and for the demonstration below it will be important to have pandas installed in your environment.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Finding-an-API-Endpoint">
+<a class="anchor" href="#Finding-an-API-Endpoint" aria-hidden="true"><span class="octicon octicon-link"></span></a>Finding an API Endpoint<a class="anchor-link" href="#Finding-an-API-Endpoint"> </a>
+</h2>
+<p>Before we dive into actually reading data, it is important to know where to look for potential datasets.  Most cities have their Open Data tied to the city's website.  In this case we are going to explore the City of Cincinnati's Open Data Portal, which can be found at this <a href="https://data.cincinnati-oh.gov">link</a>.</p>
+<p><img src="/the-city-scraper/images/copied_from_nb/../images/2021-08-19-open-data-portal.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>At this point, we can navigate into one of the categories or search for a specific dataset.  In this case, we select the 'Safety' category and will then choose the Police Calls dataset.</p>
+<p><img src="/the-city-scraper/images/copied_from_nb/../images/2021-08-19-safety-data.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We are now able to Copy the API Endpoint by selecting the 'API' button and the 'Copy' button next to the endpoint.</p>
+<p><img src="/the-city-scraper/images/copied_from_nb/../images/2021-08-19-PDI-endpoint.png" alt=""></p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Reading-in-Data-via-API">
+<a class="anchor" href="#Reading-in-Data-via-API" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reading in Data via API<a class="anchor-link" href="#Reading-in-Data-via-API"> </a>
+</h2>
+<p>You might notice that the API endpoint is just a link - try accessing the link below in your browser.  You will notice that the result is just a JSON string in your browser - this is the data we are pulling in imminently!</p>
+<p>In order to read this into a pandas DataFrame, we utilize the pandas <code>read_json</code> function.  This function only has one required argument, <code>path_or_buf</code> and we set the value to our API endpoint.  More information on <code>read_json</code> can be found by looking at its docstring (simply run <code>?read_json</code>).</p>
+<p>Note that in this initial read, we only pull back 1,000 total rows.  This is the default response when no other parameters are added to the endpoint URL.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">crime_data_endpoint</span> <span class="o">=</span> <span class="s1">'https://data.cincinnati-oh.gov/resource/k59e-2pvf.json'</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">path_or_buf</span> <span class="o">=</span> <span class="n">crime_data_endpoint</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>instanceid</th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>date_from</th>
+      <th>date_to</th>
+      <th>clsd</th>
+      <th>ucr</th>
+      <th>dst</th>
+      <th>beat</th>
+      <th>offense</th>
+      <th>...</th>
+      <th>suspect_age</th>
+      <th>totalnumbervictims</th>
+      <th>ucr_group</th>
+      <th>community_council_neighborhood</th>
+      <th>zip</th>
+      <th>suspect_race</th>
+      <th>suspect_ethnicity</th>
+      <th>suspect_gender</th>
+      <th>totalsuspects</th>
+      <th>theft_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>75092BE1-203C-4251-A197-6A4CD492E803</td>
+      <td>129023054</td>
+      <td>2012-08-15T19:40:00.000</td>
+      <td>2012-08-15T01:00:00.000</td>
+      <td>2012-08-15T09:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>551</td>
+      <td>2</td>
+      <td>1.0</td>
+      <td>BURGLARY</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>BURGLARY/BREAKING ENTERING</td>
+      <td>N/A</td>
+      <td>45206</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>D229DDF6-0F66-4AC5-AD13-7F83D2566A91</td>
+      <td>179006481</td>
+      <td>2017-03-02T17:16:00.000</td>
+      <td>2017-03-02T17:10:00.000</td>
+      <td>2017-03-02T17:15:00.000</td>
+      <td>J--CLOSED</td>
+      <td>810</td>
+      <td>3</td>
+      <td>2.0</td>
+      <td>ASSAULT</td>
+      <td>...</td>
+      <td>31-40</td>
+      <td>1.0</td>
+      <td>PART 2 MINOR</td>
+      <td>N/A</td>
+      <td>45205</td>
+      <td>WHITE</td>
+      <td>NOT OF HISPANIC ORIG</td>
+      <td>MALE</td>
+      <td>1.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>961D1BFE-C1BB-4B44-A8F9-2599F7C83249</td>
+      <td>179020029</td>
+      <td>2017-06-01T10:35:00.000</td>
+      <td>2017-06-01T10:25:00.000</td>
+      <td>2017-06-01T10:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>24O-MOTOR VEHICLE THEFT</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>847165DB-0557-4E36-8692-900D6C456055</td>
+      <td>129005579</td>
+      <td>2012-03-04T03:11:00.000</td>
+      <td>2012-03-04T03:10:00.000</td>
+      <td>2012-03-04T03:11:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>301</td>
+      <td>5</td>
+      <td>1.0</td>
+      <td>ROBBERY</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>ROBBERY</td>
+      <td>N/A</td>
+      <td>45219</td>
+      <td>UNKNOWN</td>
+      <td>UNKNOWN</td>
+      <td>MALE</td>
+      <td>1.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>C1292536-04EB-42BC-9B80-263D731ABD0E</td>
+      <td>179053792</td>
+      <td>2017-12-17T09:53:00.000</td>
+      <td>2017-12-10T18:00:00.000</td>
+      <td>2017-12-11T08:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>23F-THEFT FROM MOTOR VEHICLE</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>67038B33-6C6F-4720-9C17-706C841B6662</td>
+      <td>159006129</td>
+      <td>2015-03-16T10:55:00.000</td>
+      <td>2015-03-13T16:00:00.000</td>
+      <td>2015-03-16T10:30:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>552</td>
+      <td>3</td>
+      <td>4.0</td>
+      <td>BREAKING AND ENTERING</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>BURGLARY/BREAKING ENTERING</td>
+      <td>N/A</td>
+      <td>45214</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>7D66BB58-BCE4-4A2B-B0FA-6405696E9A11</td>
+      <td>11104733</td>
+      <td>2011-11-23T23:05:00.000</td>
+      <td>2011-11-23T18:30:00.000</td>
+      <td>2011-11-23T23:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>23F-THEFT FROM MOTOR VEHICLE</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>AEA518CF-A343-49D6-9F47-27A9225D00DC</td>
+      <td>129014979</td>
+      <td>2012-06-01T01:45:00.000</td>
+      <td>2012-05-31T22:30:00.000</td>
+      <td>2012-06-01T01:00:00.000</td>
+      <td>J--CLOSED</td>
+      <td>1493</td>
+      <td>4</td>
+      <td>5.0</td>
+      <td>CRIMINAL DAMAGING/ENDANGERING</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>2.0</td>
+      <td>PART 2 MINOR</td>
+      <td>N/A</td>
+      <td>45237</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>3C1B16A9-8A1F-47B8-AB30-505670F60DF3</td>
+      <td>179029164</td>
+      <td>2017-07-21T11:45:00.000</td>
+      <td>2017-07-20T18:30:00.000</td>
+      <td>2017-07-20T18:30:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>3</td>
+      <td>3.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45238</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>23H-ALL OTHER LARCENY</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>90F56582-D283-4F02-917F-58C153446B9E</td>
+      <td>199001269</td>
+      <td>2019-01-17T13:05:00.000</td>
+      <td>2019-01-17T05:25:00.000</td>
+      <td>2019-01-17T05:26:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>552</td>
+      <td>1</td>
+      <td>2.0</td>
+      <td>BREAKING AND ENTERING</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>BURGLARY/BREAKING ENTERING</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 38 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Socrata-Query-Language-(SoQL)">
+<a class="anchor" href="#Socrata-Query-Language-(SoQL)" aria-hidden="true"><span class="octicon octicon-link"></span></a>Socrata Query Language (SoQL)<a class="anchor-link" href="#Socrata-Query-Language-(SoQL)"> </a>
+</h2>
+<p>In the above example, we simply query the entire dataset (albeit a sample of 1,000 rows) given we did not make any tweaks to the base URL.  However, we are able to arrive at fairly robust queries using the SoQL querying language. SoQL is a querying language developed by Socrata in order to make the process of requesting data via their API more efficient.  In their <a href="https://dev.socrata.com/docs/queries/">documentation</a> they mention their intentions of mirroring the spirit of SQL and I believe they accomplished that goal quite well.</p>
+<p>Being well versed in this querying language provides enormous benefits in the case of processing time.  It is far more efficient to execute data processing against the Socrata servers prior to bringing in data to your local machine.  For the remainder of this post we will explore examples of utilizing SoQL queries to refine our data before pulling it into our local machines.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Example-1:-Simple-Filter">
+<a class="anchor" href="#Example-1:-Simple-Filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example 1: Simple Filter<a class="anchor-link" href="#Example-1:-Simple-Filter"> </a>
+</h3>
+<p>In our first example, we are going to execute a simple filter on our data by updating the <code>$WHERE</code> parameter.  As you would imagine, the default value for the <code>$WHERE</code> parameter is No Filter.</p>
+<p>In our initial query above, we see that there is an <code>offense</code> column with a number of different values, stored as strings.  For this exercise, we are going to filter to instances where <code>offense</code> is equal to 'THEFT'.</p>
+<p>In practice, we are able to execute this by modifying our API endpoint with the simple filter clause stamped on at the end.  To signal that we are going to add a SoQL clause to our endpoint, we first add a question mark (?) at the end of the initial endpoint, immediately following '.json':  <code>https://data.cincinnati-oh.gov/resource/k59e-2pvf.json?</code></p>
+<p>Now, we must add the actual where clause.  In this case, we first declare that we are updating the <code>$WHERE</code> parameter by adding <code>where=</code>.  We now add the filter statement, in this case <code>offense = 'THEFT'</code>.  This gives us a final query that looks like the following:</p>
+<p><code>https://data.cincinnati-oh.gov/resource/k59e-2pvf.json?$WHERE=offense='THEFT'</code>.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>from this point forward we will simply reference <code>crime_data_endpoint</code> when generating queries.  We will take advantage of f-String formatting that allows us to pass through a variable to a string statement (i.e. if <code>name</code> is a variable defined in the environment as the value of <code>&amp;#8217;Joe&amp;#8217;</code>, the statement <code>f"I am {name}"</code> will evaluate to <code>&amp;#8217;I am Joe&amp;#8217;</code>.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">crime_data_endpoint</span><span class="si">}</span><span class="s2">?$WHERE=offense='THEFT'"</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>instanceid</th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>date_from</th>
+      <th>date_to</th>
+      <th>clsd</th>
+      <th>ucr</th>
+      <th>dst</th>
+      <th>beat</th>
+      <th>offense</th>
+      <th>...</th>
+      <th>suspect_age</th>
+      <th>totalnumbervictims</th>
+      <th>ucr_group</th>
+      <th>community_council_neighborhood</th>
+      <th>zip</th>
+      <th>suspect_race</th>
+      <th>suspect_ethnicity</th>
+      <th>suspect_gender</th>
+      <th>totalsuspects</th>
+      <th>side</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>961D1BFE-C1BB-4B44-A8F9-2599F7C83249</td>
+      <td>179020029</td>
+      <td>2017-06-01T10:35:00.000</td>
+      <td>2017-06-01T10:25:00.000</td>
+      <td>2017-06-01T10:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>C1292536-04EB-42BC-9B80-263D731ABD0E</td>
+      <td>179053792</td>
+      <td>2017-12-17T09:53:00.000</td>
+      <td>2017-12-10T18:00:00.000</td>
+      <td>2017-12-11T08:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>853035AE-12A4-4F27-8960-78DB3B0D8B6E</td>
+      <td>139024773</td>
+      <td>2013-09-11T21:30:00.000</td>
+      <td>2013-09-11T18:45:00.000</td>
+      <td>2013-09-11T19:41:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>2</td>
+      <td>NaN</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45226</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>17A8E469-B955-4C9E-A39A-09A8610FB180</td>
+      <td>179050509</td>
+      <td>2017-11-27T14:35:00.000</td>
+      <td>2017-11-23T16:00:00.000</td>
+      <td>2017-11-23T16:00:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>600</td>
+      <td>2</td>
+      <td>4.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>18-25</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45230</td>
+      <td>WHITE</td>
+      <td>HISPANIC ORIGIN</td>
+      <td>MALE</td>
+      <td>1.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>FFBEE182-CE3D-4E34-9A95-524C07AC1695</td>
+      <td>11005036</td>
+      <td>2010-10-26T10:48:00.000</td>
+      <td>2010-10-23T02:00:00.000</td>
+      <td>2010-10-23T02:15:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>3.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45203</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>1951F631-6E0B-495C-A071-189333C1D1CF</td>
+      <td>169015730</td>
+      <td>2016-06-28T06:45:00.000</td>
+      <td>2016-06-28T01:00:00.000</td>
+      <td>2016-06-28T06:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>B922AC23-0156-4C8B-AF72-298C69BED2C2</td>
+      <td>129016496</td>
+      <td>2012-06-18T07:40:00.000</td>
+      <td>2012-06-14T17:30:00.000</td>
+      <td>2012-06-18T06:30:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>3.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45203</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>83F56B29-D15A-407E-9321-5841397CE935</td>
+      <td>129031483</td>
+      <td>2012-10-27T22:30:00.000</td>
+      <td>2012-10-27T07:00:00.000</td>
+      <td>2012-10-27T20:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>2</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45209</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>59B7E1FB-947D-4BC2-B42D-6F6E59FD039D</td>
+      <td>159018103</td>
+      <td>2015-07-13T08:52:00.000</td>
+      <td>2015-07-11T16:00:00.000</td>
+      <td>2015-07-13T10:50:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>CENTRAL BUSINESS</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>38B66A5A-8EC5-4383-A62F-2E30F537F02A</td>
+      <td>159027434</td>
+      <td>2015-10-05T14:30:00.000</td>
+      <td>2015-10-02T15:00:00.000</td>
+      <td>2015-10-05T11:15:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>4</td>
+      <td>4.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45229</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 36 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With the query above, we see the data returned is exclusively limited to 'THEFT' offenses as desired.  We are now going to demonstrate the ability to string multiple <code>WHERE</code> clauses into the same query.</p>
+<p>In order to do so, we tap into the logical operators allowed within the SoQL framework.  The following operators are available as illustrated in the <a href="https://dev.socrata.com/docs/queries/where.html">documentation</a>:</p>
+<ul>
+<li>
+<code>AND</code> (&amp;)</li>
+<li>
+<code>OR</code> (|)</li>
+<li><code>NOT</code></li>
+<li><code>IS NULL</code></li>
+<li><code>IS NOT NULL</code></li>
+</ul>
+<p>In this case, we are going to add the condition that an incident must have occurred in the <code>45202</code> zip code.  To accomplish this, we simply add the <code>&amp;</code> symbol and an additional condition of <code>zip=45202</code>.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>the SoQL documentation shows examples that include spaces in the endpoint URL.  The <code>pd.read_json()</code> function does not accept URLs with spaces.  Do your best to avoid using spaces, or replace the space with its URL encoding (in the case of a space that is <code>%20</code>).
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">crime_data_endpoint</span><span class="si">}</span><span class="s2">?$WHERE=offense='THEFT'&amp;zip=45202"</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>instanceid</th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>date_from</th>
+      <th>date_to</th>
+      <th>clsd</th>
+      <th>ucr</th>
+      <th>dst</th>
+      <th>beat</th>
+      <th>offense</th>
+      <th>...</th>
+      <th>suspect_age</th>
+      <th>totalnumbervictims</th>
+      <th>ucr_group</th>
+      <th>community_council_neighborhood</th>
+      <th>zip</th>
+      <th>suspect_race</th>
+      <th>suspect_ethnicity</th>
+      <th>suspect_gender</th>
+      <th>totalsuspects</th>
+      <th>side</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>5AAC40C8-755D-4163-9DFF-5D51D5E350B2</td>
+      <td>129017582</td>
+      <td>2012-06-18T12:55:00.000</td>
+      <td>2012-06-18T12:00:00.000</td>
+      <td>2012-06-18T12:45:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>600</td>
+      <td>4</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>87EC8A12-B8C1-49D7-B77F-613741A60755</td>
+      <td>179050214</td>
+      <td>2017-11-25T08:40:00.000</td>
+      <td>2017-11-25T01:00:00.000</td>
+      <td>2017-11-25T01:30:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>CENTRAL BUSINESS</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>4FBD01D3-FE0A-4B66-9798-930351A11081</td>
+      <td>129028052</td>
+      <td>2012-09-26T22:10:00.000</td>
+      <td>2012-09-26T21:30:00.000</td>
+      <td>2012-09-26T22:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>F36D6971-0AD4-45E3-93E7-44A4C1C220EF</td>
+      <td>179C000285</td>
+      <td>2017-06-02T09:22:24.000</td>
+      <td>2017-05-18T11:00:00.000</td>
+      <td>2017-05-18T14:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>CENTRAL BUSINESS</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>6B3CB5AB-56F8-44A8-BB49-49F1D87367CD</td>
+      <td>189026973</td>
+      <td>2018-10-06T13:05:00.000</td>
+      <td>2018-10-06T13:00:00.000</td>
+      <td>2018-10-06T12:00:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>CENTRAL BUSINESS</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>496C05FC-A9F8-44E3-A236-8DC4C645C649</td>
+      <td>159C000036</td>
+      <td>2015-01-22T01:08:41.000</td>
+      <td>2015-01-21T22:00:00.000</td>
+      <td>2015-01-22T00:55:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>CEB4AA17-8C35-4D4B-89A4-47805B8E5EB1</td>
+      <td>139023763</td>
+      <td>2013-08-29T03:53:00.000</td>
+      <td>2013-08-29T03:40:00.000</td>
+      <td>2013-08-29T03:53:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>600</td>
+      <td>1</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>4</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>D270C30F-981E-48EF-9597-78B709A03638</td>
+      <td>11105023</td>
+      <td>2011-12-19T12:15:00.000</td>
+      <td>2011-12-16T12:00:00.000</td>
+      <td>2011-12-16T12:15:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>1.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>C0734EA5-6307-4DFF-86AF-1906D0A89C5B</td>
+      <td>139016219</td>
+      <td>2013-06-25T15:45:00.000</td>
+      <td>2013-06-23T19:00:00.000</td>
+      <td>2013-06-23T19:05:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>794900A6-021F-4B81-BF7D-5D38CBA3BEDA</td>
+      <td>129019335</td>
+      <td>2012-07-10T19:35:00.000</td>
+      <td>2012-07-10T18:00:00.000</td>
+      <td>2012-07-10T18:50:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>4</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 36 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Example-2:-Date-Filter">
+<a class="anchor" href="#Example-2:-Date-Filter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example 2: Date Filter<a class="anchor-link" href="#Example-2:-Date-Filter"> </a>
+</h3>
+<p>Working with dates can be finnicky in any scenario.  In this example, we aim to illustrate how to introduce a simple filter to limit the date range of our returned crime instances.</p>
+<p>As you can see and infer from above, we have several fields that are represented as timestamps.  For this exercise, we are going to specifically focus on the <code>date_reported</code> field.  Let's explore how we would only look at records for which the <code>date_reported</code> value occurred within the last year.</p>
+<p>For this exercise we will take advantage of the <code>datetime</code> library that assists with time and date operations.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+
+<span class="c1"># dynamically generate today's date</span>
+<span class="n">today</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+
+<span class="c1"># dynamically arrive at the date exactly 365 days ago</span>
+<span class="n">year_ago_today</span> <span class="o">=</span> <span class="n">today</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span> <span class="o">=</span> <span class="mi">365</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">year_ago_today</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>2020-08-23
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now that we have our date for exactly one year ago, we can utilize it within our API call.  Similar to the simple filters above, we simply create a <code>$WHERE</code> clause, but in this case we look at instances where the <code>date_reported</code> field satisfies the condition of being after our <code>year_ago_today</code> value.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>it is important to enclose the value for <code>year_ago_today</code> in quotes.  In this case I use single quotes for within the query, and enclose the entire query using double quotes.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">crime_data_endpoint</span><span class="si">}</span><span class="s2">?$WHERE=date_reported&gt;='</span><span class="si">{</span><span class="n">year_ago_today</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>instanceid</th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>date_from</th>
+      <th>date_to</th>
+      <th>clsd</th>
+      <th>ucr</th>
+      <th>dst</th>
+      <th>beat</th>
+      <th>offense</th>
+      <th>...</th>
+      <th>zip</th>
+      <th>longitude_x</th>
+      <th>latitude_x</th>
+      <th>floor</th>
+      <th>side</th>
+      <th>opening</th>
+      <th>suspect_race</th>
+      <th>suspect_ethnicity</th>
+      <th>suspect_gender</th>
+      <th>totalsuspects</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>13624621-3CB9-49B5-8106-E99B589D3EE3</td>
+      <td>209018990</td>
+      <td>2020-08-23T00:00:00.000</td>
+      <td>2020-08-22T19:00:00.000</td>
+      <td>2020-08-23T00:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600.0</td>
+      <td>1</td>
+      <td>3</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45202.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>08DCA723-F1D9-4A9F-AD89-30A6993F7668</td>
+      <td>209018825</td>
+      <td>2020-08-23T00:33:00.000</td>
+      <td>2020-08-23T00:33:00.000</td>
+      <td>2020-08-23T00:38:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>810.0</td>
+      <td>4</td>
+      <td>2</td>
+      <td>ASSAULT</td>
+      <td>...</td>
+      <td>45206.0</td>
+      <td>-84.487036</td>
+      <td>39.136701</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>9BDDA414-5B4D-4301-B84D-234496CDE330</td>
+      <td>209018850</td>
+      <td>2020-08-23T00:36:00.000</td>
+      <td>2020-08-22T23:00:00.000</td>
+      <td>2020-08-23T00:30:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>862.0</td>
+      <td>CENTRAL BUSINESS</td>
+      <td>1</td>
+      <td>DOMESTIC VIOLENCE</td>
+      <td>...</td>
+      <td>45202.0</td>
+      <td>-84.513128</td>
+      <td>39.099431</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>84DFCE4D-0FEB-4D4B-9AD9-90521B34211C</td>
+      <td>209018827</td>
+      <td>2020-08-23T01:07:00.000</td>
+      <td>2020-08-23T01:00:00.000</td>
+      <td>2020-08-23T01:07:00.000</td>
+      <td>K--UNFOUNDED</td>
+      <td>600.0</td>
+      <td>5</td>
+      <td>4</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45224.0</td>
+      <td>-84.545400</td>
+      <td>39.202558</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3DD34BF6-75FC-4536-8F6C-906232FB33BE</td>
+      <td>209018829</td>
+      <td>2020-08-23T01:50:00.000</td>
+      <td>2020-08-23T01:30:00.000</td>
+      <td>2020-08-23T01:45:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>862.0</td>
+      <td>3</td>
+      <td>2</td>
+      <td>DOMESTIC VIOLENCE</td>
+      <td>...</td>
+      <td>45205.0</td>
+      <td>-84.572002</td>
+      <td>39.122697</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>0F0D26CB-0428-43DC-8AC6-A60016234A18</td>
+      <td>209019851</td>
+      <td>2020-09-02T10:51:00.000</td>
+      <td>2020-09-02T00:15:00.000</td>
+      <td>2020-09-02T01:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600.0</td>
+      <td>4</td>
+      <td>5</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45237.0</td>
+      <td>-84.459236</td>
+      <td>39.204974</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>A3FA9007-5870-411C-8430-43B5C8449A2F</td>
+      <td>209019870</td>
+      <td>2020-09-02T11:34:00.000</td>
+      <td>2020-09-01T23:00:00.000</td>
+      <td>2020-09-02T11:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600.0</td>
+      <td>2</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45207.0</td>
+      <td>-84.473283</td>
+      <td>39.141627</td>
+      <td>NaN</td>
+      <td>6 - UNKNOWN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>99A181EB-06B1-4676-B5EB-6B98F24E0B0E</td>
+      <td>209C000687</td>
+      <td>2020-09-02T11:36:52.000</td>
+      <td>2020-08-31T19:00:00.000</td>
+      <td>2020-09-01T08:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600.0</td>
+      <td>CENTRAL BUSINESS</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45202.0</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>7E910A4D-A00E-4092-8A7D-56DF7AC9B144</td>
+      <td>209019858</td>
+      <td>2020-09-02T11:45:00.000</td>
+      <td>2020-09-01T20:30:20.000</td>
+      <td>2020-09-02T10:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600.0</td>
+      <td>1</td>
+      <td>3</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45203.0</td>
+      <td>-84.538450</td>
+      <td>39.105948</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>F8191D76-238A-47CD-B86D-6F2CC0B2E83B</td>
+      <td>209019854</td>
+      <td>2020-09-02T11:50:00.000</td>
+      <td>2020-08-23T07:00:00.000</td>
+      <td>2020-08-24T07:00:00.000</td>
+      <td>H--WARRANT ISSUED</td>
+      <td>600.0</td>
+      <td>4</td>
+      <td>3</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>45229.0</td>
+      <td>-84.490949</td>
+      <td>39.145513</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>BLACK</td>
+      <td>NOT OF HISPANIC ORIG</td>
+      <td>MALE</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 40 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Example-3:-Toggling-Row-Limit">
+<a class="anchor" href="#Example-3:-Toggling-Row-Limit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example 3: Toggling Row Limit<a class="anchor-link" href="#Example-3:-Toggling-Row-Limit"> </a>
+</h3>
+<p>By default, the row limit returned by the Socrata API is 1,000.  This is great for datasets smaller than 1,000 rows and illustrative blog posts, but for anything that actually matters it will be woefully insufficient.  Hence, we will now walk through the means for adjusting the row limit and integrating this into our queries.</p>
+<p>This mechanic is really quite straightforward.  Similar to other SoQL query arguments, we simply define the parameter we are adjusting by adding <code>$LIMIT</code>, and then specifying the value for which to limit the row counts.  In the example below we limit this to <code>10</code>, however, you could ramp it up as large or small as needed.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>I have not found an ’unlimited’ value for this argument, thus if I know I would like to return all records I simply pass through an uncharacteristically large value that would not be anywhere near the max size of the data.  This is not a perfect solution but gets the job done when you know the rough size of your data.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">crime_data_endpoint</span><span class="si">}</span><span class="s2">?$LIMIT=10"</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>instanceid</th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>date_from</th>
+      <th>date_to</th>
+      <th>clsd</th>
+      <th>ucr</th>
+      <th>dst</th>
+      <th>beat</th>
+      <th>offense</th>
+      <th>...</th>
+      <th>suspect_age</th>
+      <th>totalnumbervictims</th>
+      <th>ucr_group</th>
+      <th>community_council_neighborhood</th>
+      <th>zip</th>
+      <th>suspect_race</th>
+      <th>suspect_ethnicity</th>
+      <th>suspect_gender</th>
+      <th>totalsuspects</th>
+      <th>theft_code</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>75092BE1-203C-4251-A197-6A4CD492E803</td>
+      <td>129023054</td>
+      <td>2012-08-15T19:40:00.000</td>
+      <td>2012-08-15T01:00:00.000</td>
+      <td>2012-08-15T09:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>551</td>
+      <td>2</td>
+      <td>1.0</td>
+      <td>BURGLARY</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>BURGLARY/BREAKING ENTERING</td>
+      <td>N/A</td>
+      <td>45206</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>D229DDF6-0F66-4AC5-AD13-7F83D2566A91</td>
+      <td>179006481</td>
+      <td>2017-03-02T17:16:00.000</td>
+      <td>2017-03-02T17:10:00.000</td>
+      <td>2017-03-02T17:15:00.000</td>
+      <td>J--CLOSED</td>
+      <td>810</td>
+      <td>3</td>
+      <td>2.0</td>
+      <td>ASSAULT</td>
+      <td>...</td>
+      <td>31-40</td>
+      <td>1</td>
+      <td>PART 2 MINOR</td>
+      <td>N/A</td>
+      <td>45205</td>
+      <td>WHITE</td>
+      <td>NOT OF HISPANIC ORIG</td>
+      <td>MALE</td>
+      <td>1.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>961D1BFE-C1BB-4B44-A8F9-2599F7C83249</td>
+      <td>179020029</td>
+      <td>2017-06-01T10:35:00.000</td>
+      <td>2017-06-01T10:25:00.000</td>
+      <td>2017-06-01T10:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>24O-MOTOR VEHICLE THEFT</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>847165DB-0557-4E36-8692-900D6C456055</td>
+      <td>129005579</td>
+      <td>2012-03-04T03:11:00.000</td>
+      <td>2012-03-04T03:10:00.000</td>
+      <td>2012-03-04T03:11:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>301</td>
+      <td>5</td>
+      <td>1.0</td>
+      <td>ROBBERY</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>ROBBERY</td>
+      <td>N/A</td>
+      <td>45219</td>
+      <td>UNKNOWN</td>
+      <td>UNKNOWN</td>
+      <td>MALE</td>
+      <td>1.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>C1292536-04EB-42BC-9B80-263D731ABD0E</td>
+      <td>179053792</td>
+      <td>2017-12-17T09:53:00.000</td>
+      <td>2017-12-10T18:00:00.000</td>
+      <td>2017-12-11T08:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>2</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>23F-THEFT FROM MOTOR VEHICLE</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>853035AE-12A4-4F27-8960-78DB3B0D8B6E</td>
+      <td>139024773</td>
+      <td>2013-09-11T21:30:00.000</td>
+      <td>2013-09-11T18:45:00.000</td>
+      <td>2013-09-11T19:41:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>2</td>
+      <td>NaN</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45226</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>23F-THEFT FROM MOTOR VEHICLE</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>E8A3F779-6839-43D5-81C4-1A07D685C951</td>
+      <td>199003757</td>
+      <td>2019-02-22T21:36:00.000</td>
+      <td>2019-02-22T21:30:00.000</td>
+      <td>2019-02-22T21:40:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>810</td>
+      <td>4</td>
+      <td>1.0</td>
+      <td>ASSAULT</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>2</td>
+      <td>PART 2 MINOR</td>
+      <td>N/A</td>
+      <td>45219</td>
+      <td>BLACK</td>
+      <td>UNKNOWN</td>
+      <td>MALE</td>
+      <td>2.0</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>17A8E469-B955-4C9E-A39A-09A8610FB180</td>
+      <td>179050509</td>
+      <td>2017-11-27T14:35:00.000</td>
+      <td>2017-11-23T16:00:00.000</td>
+      <td>2017-11-23T16:00:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>600</td>
+      <td>2</td>
+      <td>4.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>18-25</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45230</td>
+      <td>WHITE</td>
+      <td>HISPANIC ORIGIN</td>
+      <td>MALE</td>
+      <td>1.0</td>
+      <td>23D-THEFT FROM BUILDING</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>D7B24514-318A-4D0D-9B00-54E369EF0356</td>
+      <td>129014121</td>
+      <td>2012-05-28T21:00:00.000</td>
+      <td>2012-05-28T20:38:00.000</td>
+      <td>2012-05-28T20:40:00.000</td>
+      <td>J--CLOSED</td>
+      <td>1493</td>
+      <td>1</td>
+      <td>2.0</td>
+      <td>CRIMINAL DAMAGING/ENDANGERING</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>PART 2 MINOR</td>
+      <td>N/A</td>
+      <td>45202</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>6F3F5D41-24A9-490F-84A0-0430314A341F</td>
+      <td>51007218</td>
+      <td>2010-11-26T10:35:00.000</td>
+      <td>2010-11-26T00:30:00.000</td>
+      <td>2010-11-26T00:35:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>1493</td>
+      <td>5</td>
+      <td>1.0</td>
+      <td>CRIMINAL DAMAGING/ENDANGERING</td>
+      <td>...</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>PART 2 MINOR</td>
+      <td>N/A</td>
+      <td>45220</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>10 rows × 38 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">crime_data_endpoint</span><span class="si">}</span><span class="s2">?$WHERE=offense='THEFT'&amp;$LIMIT=5"</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>instanceid</th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>date_from</th>
+      <th>date_to</th>
+      <th>clsd</th>
+      <th>ucr</th>
+      <th>dst</th>
+      <th>beat</th>
+      <th>offense</th>
+      <th>...</th>
+      <th>victim_gender</th>
+      <th>suspect_age</th>
+      <th>totalnumbervictims</th>
+      <th>ucr_group</th>
+      <th>community_council_neighborhood</th>
+      <th>zip</th>
+      <th>suspect_race</th>
+      <th>suspect_ethnicity</th>
+      <th>suspect_gender</th>
+      <th>totalsuspects</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>961D1BFE-C1BB-4B44-A8F9-2599F7C83249</td>
+      <td>179020029</td>
+      <td>2017-06-01T10:35:00.000</td>
+      <td>2017-06-01T10:25:00.000</td>
+      <td>2017-06-01T10:30:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>MALE</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>C1292536-04EB-42BC-9B80-263D731ABD0E</td>
+      <td>179053792</td>
+      <td>2017-12-17T09:53:00.000</td>
+      <td>2017-12-10T18:00:00.000</td>
+      <td>2017-12-11T08:00:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>5</td>
+      <td>2.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>MALE</td>
+      <td>UNKNOWN</td>
+      <td>2</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45225</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>853035AE-12A4-4F27-8960-78DB3B0D8B6E</td>
+      <td>139024773</td>
+      <td>2013-09-11T21:30:00.000</td>
+      <td>2013-09-11T18:45:00.000</td>
+      <td>2013-09-11T19:41:00.000</td>
+      <td>Z--EARLY CLOSED</td>
+      <td>600</td>
+      <td>2</td>
+      <td>NaN</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>MALE</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45226</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>17A8E469-B955-4C9E-A39A-09A8610FB180</td>
+      <td>179050509</td>
+      <td>2017-11-27T14:35:00.000</td>
+      <td>2017-11-23T16:00:00.000</td>
+      <td>2017-11-23T16:00:00.000</td>
+      <td>F--CLEARED BY ARREST - ADULT</td>
+      <td>600</td>
+      <td>2</td>
+      <td>4.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>FEMALE</td>
+      <td>18-25</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45230</td>
+      <td>WHITE</td>
+      <td>HISPANIC ORIGIN</td>
+      <td>MALE</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>FFBEE182-CE3D-4E34-9A95-524C07AC1695</td>
+      <td>11005036</td>
+      <td>2010-10-26T10:48:00.000</td>
+      <td>2010-10-23T02:00:00.000</td>
+      <td>2010-10-23T02:15:00.000</td>
+      <td>J--CLOSED</td>
+      <td>600</td>
+      <td>1</td>
+      <td>3.0</td>
+      <td>THEFT</td>
+      <td>...</td>
+      <td>FEMALE</td>
+      <td>UNKNOWN</td>
+      <td>1</td>
+      <td>THEFT</td>
+      <td>N/A</td>
+      <td>45203</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>5 rows × 35 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Example-4:-Select-Subset-of-Columns">
+<a class="anchor" href="#Example-4:-Select-Subset-of-Columns" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example 4: Select Subset of Columns<a class="anchor-link" href="#Example-4:-Select-Subset-of-Columns"> </a>
+</h3>
+<p>In this example we walkthrough the method for selecting only a subset of the columns in a dataframe.  This improves performance when you only need to work with a subset of columns by reducing the size of the dataframe.</p>
+<p>The syntax is fairly straightforward and mirrors the methods for adding other parameters to our query.  Simply add a <code>$SELECT=</code> clause to the URL and list columns to include, separated by commas.
+</p>
+<div class="flash">
+    <svg class="octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info octicon octicon-info" viewbox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"></path></svg>
+    <strong>Note: </strong>again, it is important to avoid spaces within the URL.  There is functionality to select columns under new names, like so: <code>$SELECT=suspect_gender AS gender</code>.  However, in this case we need to clean up the query to avoid any spaces in the URL by replacing them with the <code>%20</code> notation: <code>$SELECT=suspect_gender%20AS%20gender</code>.
+</div>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">crime_data_endpoint</span><span class="si">}</span><span class="s2">?$SELECT=incident_no,date_reported,suspect_gender"</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>incident_no</th>
+      <th>date_reported</th>
+      <th>suspect_gender</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>129023054</td>
+      <td>2012-08-15T19:40:00.000</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>179006481</td>
+      <td>2017-03-02T17:16:00.000</td>
+      <td>MALE</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>179020029</td>
+      <td>2017-06-01T10:35:00.000</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>129005579</td>
+      <td>2012-03-04T03:11:00.000</td>
+      <td>MALE</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>179053792</td>
+      <td>2017-12-17T09:53:00.000</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>209015661</td>
+      <td>2020-07-20T04:00:00.000</td>
+      <td>MALE</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>129008180</td>
+      <td>2012-03-24T22:47:00.000</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>149015152</td>
+      <td>2014-06-25T11:31:00.000</td>
+      <td>MALE</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>179025466</td>
+      <td>2017-07-05T11:45:00.000</td>
+      <td>MALE</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>179025466</td>
+      <td>2017-07-05T11:45:00.000</td>
+      <td>MALE</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 3 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Example-5:-Putting-it-All-Together-with-$query">
+<a class="anchor" href="#Example-5:-Putting-it-All-Together-with-%24query" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example 5: Putting it All Together with <code>$query</code><a class="anchor-link" href="#Example-5:-Putting-it-All-Together-with-%24query"> </a>
+</h3>
+<p>Up until this point, we have walked through the parameters that can be modified within a query on an individual basis.  It was noted that multiple parameters can be combined by adding an <code>&amp;</code> symbol between parameters, leading to more complex queries.  However, there is an easier way to string these parameters together, and it manifests itself within the <code>$query</code> parameter.</p>
+<p>In these examples we will demonstrate how to string together a full-fledged query using the single <code>$query</code> parameter.  These queries will strongly resemble standard SQL queries that lack a <code>FROM</code> clause.</p>
+<p>To make things simpler, I have created a function (<code>generate_query</code>) to take care of some of the less readable pieces of these queries, notably the requirement to replace spaces (<code>' '</code>) with <code>'%20'</code>.  Furthermore, this function breaks the components of the query into chunks, making it very human readable.</p>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># function returns a full, cleaned up API call</span>
+<span class="k">def</span> <span class="nf">generate_query</span><span class="p">(</span><span class="n">endpoint_url</span><span class="p">,</span> <span class="n">select_clause</span><span class="p">,</span> <span class="n">where_clause</span><span class="p">,</span> <span class="n">group_clause</span><span class="p">,</span> <span class="n">order_by_clause</span><span class="p">):</span>
+
+    <span class="n">raw_query</span> <span class="o">=</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">endpoint_url</span><span class="si">}</span><span class="s2">?$query="</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">select_clause</span><span class="si">}</span><span class="s2">%20"</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">where_clause</span><span class="si">}</span><span class="s2">%20"</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">group_clause</span><span class="si">}</span><span class="s2">%20"</span>
+                 <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">order_by_clause</span><span class="si">}</span><span class="s2">"</span>
+                <span class="p">)</span>
+    
+    <span class="n">final_query</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">raw_query</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="s2">"%20"</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">final_query</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Now, with our function in hand let's accomplish the following within two separate queries:</p>
+<ol>
+<li>Select the columns <code>date_reported</code> and <code>offense</code> for records where <code>suspect_gender</code> is 'MALE'</li>
+<li>Count the number of records by offense type for all crimes within the past year, order by the count in descending order</li>
+</ol>
+
+</div>
+</div>
+</div>
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">first_query</span> <span class="o">=</span> <span class="n">generate_query</span><span class="p">(</span><span class="n">endpoint_url</span> <span class="o">=</span> <span class="n">crime_data_endpoint</span><span class="p">,</span>
+               <span class="n">select_clause</span> <span class="o">=</span> <span class="s2">"select date_reported, offense"</span><span class="p">,</span>
+               <span class="n">where_clause</span> <span class="o">=</span> <span class="s2">"where offense = 'THEFT'"</span><span class="p">,</span>
+               <span class="n">group_clause</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+               <span class="n">order_by_clause</span> <span class="o">=</span> <span class="s2">""</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">first_query</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>https://data.cincinnati-oh.gov/resource/k59e-2pvf.json?$query=select%20date_reported,%20offense%20where%20offense%20=%20'THEFT'%20%20
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">first_query</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>date_reported</th>
+      <th>offense</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2017-06-01T10:35:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2017-12-17T09:53:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2013-09-11T21:30:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2017-11-27T14:35:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2010-10-26T10:48:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>2010-07-12T03:40:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>2015-06-01T10:30:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>2016-06-02T15:43:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>2011-08-24T14:24:00.000</td>
+      <td>THEFT</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>2012-09-21T18:49:00.000</td>
+      <td>THEFT</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 2 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">##    order by the count in descending order</span>
+
+<span class="n">second_query</span> <span class="o">=</span> <span class="n">generate_query</span><span class="p">(</span><span class="n">endpoint_url</span> <span class="o">=</span> <span class="n">crime_data_endpoint</span><span class="p">,</span>
+                              <span class="n">select_clause</span> <span class="o">=</span> <span class="s2">"select offense, count(*) as n"</span><span class="p">,</span>
+                              <span class="n">where_clause</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"where date_reported&gt;='</span><span class="si">{</span><span class="n">year_ago_today</span><span class="si">}</span><span class="s2">'"</span><span class="p">,</span>
+                              <span class="n">group_clause</span> <span class="o">=</span> <span class="s2">"group by offense"</span><span class="p">,</span>
+                              <span class="n">order_by_clause</span> <span class="o">=</span> <span class="s2">"order by count(*) desc"</span>
+                             <span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">second_query</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>https://data.cincinnati-oh.gov/resource/k59e-2pvf.json?$query=select%20offense,%20count(*)%20as%20n%20where%20date_reported&gt;='2020-08-23'%20group%20by%20offense%20order%20by%20count(*)%20desc
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+    
+
+    
+    
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">second_query</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+<details class="description">
+      <summary class="btn btn-sm" data-open="Hide Output" data-close="Show Output"></summary>
+        <p>
+</p>
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>offense</th>
+      <th>n</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>THEFT</td>
+      <td>9688</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>CRIMINAL DAMAGING/ENDANGERING</td>
+      <td>4319</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>ASSAULT</td>
+      <td>3064</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>DOMESTIC VIOLENCE</td>
+      <td>1808</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>FELONIOUS ASSAULT</td>
+      <td>1388</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>61</th>
+      <td>CRIMINAL SIMULATION</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>62</th>
+      <td>FAIL TO PROVIDE FOR FUNCTIONALLY IMPAIRED PERSON</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>63</th>
+      <td>DISRUPTING PUBLIC SERVICE</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>64</th>
+      <td>INTIMIDATION-PUBLIC SERV/PARTY OFF</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>65</th>
+      <td>RUNAWAY</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+<p>66 rows × 2 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+    </details>
+</div>
+    
+
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And with that we conclude the first post of the blog!  I hope you found this information helpful and I can't wait to deliver more content that explores the intersection of cities and data science.</p>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+  </div><!-- from https://github.com/utterance/utterances -->
+<script src="https://utteranc.es/client.js"
+        repo="jmbahr/the-city-scraper"
+        issue-term="title"
+        label="blogpost-comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+</script><a class="u-url" href="/the-city-scraper/jupyter/2021/08/19/read-socrata.html" hidden></a>
+</article>
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/the-city-scraper/"></data>
+
+  <div class="wrapper">
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col">
+        <p class="feed-subscribe">
+          <a href="/the-city-scraper/feed.xml">
+            <svg class="svg-icon orange">
+              <use xlink:href="/the-city-scraper/assets/minima-social-icons.svg#rss"></use>
+            </svg><span>Subscribe</span>
+          </a>
+        </p>
+      </div>
+      <div class="footer-col">
+        <p>An exploration of Data Science topics through the lens of city data.</p>
+      </div>
+    </div>
+
+    <div class="social-links"><ul class="social-media-list"><li><a rel="me" href="https://github.com/jmbahr" title="jmbahr"><svg class="svg-icon grey"><use xlink:href="/the-city-scraper/assets/minima-social-icons.svg#github"></use></svg></a></li></ul>
+</div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
