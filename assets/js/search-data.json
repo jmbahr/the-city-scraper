@@ -11,6 +11,17 @@
         
     
   
+    
+        ,"post1": {
+            "title": "Accessing Cincinnati's Open Data",
+            "content": "About . This notebook demonstrates some of the developer capabilities available for interacting with the City of Cincinnati&#39;s Open Data portal. . Downloading data to a local machine is manual, inefficient, and not reproducible. This demonstration aims to illustrate how to directly read these data assets into your notebook session while also applying additional logic, such as basic filtering or aggregations. . Setup . The setup . import pandas as pd . pd.read_json(&quot;https://data.cincinnati-oh.gov/resource/qrj9-83t8.json&quot;) . fiscal_year acct_period dept_code dept_desc fund_code fund_desc exp_acct_cat exp_acct_cat_desc trans_id trans_line_no record_date check_no amount vendor_name . 0 2017 | 10 | 460 | MSD Div Of Industrial Waste | 701 | Metropolitan Sewer District | 7364 | Wearing Apparel | EFT134EFT2017007693 | 17 | 2017-04-25T00:00:00.000 | 201704240071645 | 2355.92 | SAFETY SHOE DISTRIBUTORS OF OKI INC. | . 1 2017 | 10 | 197 | Recreation Athletics | 50 | General | 7364 | Wearing Apparel | AD134CHK2017014906 | 2 | 2017-04-25T00:00:00.000 | 581402 | 84.00 | PROFESSIONAL AWARDS SERVICE IN | . 2 2017 | 10 | 191 | Recreation West Region | 50 | General | 7364 | Wearing Apparel | AD134CHK2017014906 | 1 | 2017-04-25T00:00:00.000 | 581402 | 119.50 | PROFESSIONAL AWARDS SERVICE IN | . 3 2017 | 10 | 442 | MSD Millcreek Section | 701 | Metropolitan Sewer District | 7364 | Wearing Apparel | EFT134EFT2017007738 | 16 | 2017-04-25T00:00:00.000 | 201704240071690 | 352.28 | GALLS LLC | . 4 2017 | 10 | 222 | Department Of Police | 50 | General | 7361 | Mechanical And Plant Supplies | AD134CHK2017014934 | 1 | 2017-04-25T00:00:00.000 | 581437 | 186.88 | W W GRAINGER INC | . ... ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | . 995 2017 | 11 | 303 | Water Works, Div Of Supply | 101 | Water Works | 7258 | Building Repairs- Equipment | EFT134EFT2017007878 | 5 | 2017-05-02T00:00:00.000 | 201705010071830 | 492.00 | SIMPLEXGRINNELL LP | . 996 2017 | 11 | 256 | Fleet Services | 202 | Fleet Services | 7255 | Automotive By Others | AD134CHK2017015260 | 1 | 2017-05-02T00:00:00.000 | 581744 | 120.00 | JOHN CUSICK JR | . 997 2017 | 11 | 265 | Primary Health Care - H.C. | 446 | Health Network | 7341 | Medical And Surgical Supplies | AD134CHK2017015290 | 25 | 2017-05-02T00:00:00.000 | 581775 | 1367.58 | PATTERSON DENTAL SUP INC | . 998 2017 | 11 | 266 | School &amp; Adolescent Health | 353 | Home Health Services | 7289 | Expert Services-Noc | EFT134EFT2017007853 | 2 | 2017-05-02T00:00:00.000 | 201705010071805 | 1360.00 | SANTA MARIA COMMUNITY SERVICES | . 999 2017 | 11 | 442 | MSD Millcreek Section | 701 | Metropolitan Sewer District | 7364 | Wearing Apparel | EFT134EFT2017007867 | 2 | 2017-05-02T00:00:00.000 | 201705010071819 | 328.80 | INTEGRATED SUP &amp; SERV | . 1000 rows × 14 columns . import pandas as pd .",
+            "url": "https://jmbahr.github.io/the-city-scraper/jupyter/2021/07/31/cincy-data-access.html",
+            "relUrl": "/jupyter/2021/07/31/cincy-data-access.html",
+            "date": " • Jul 31, 2021"
+        }
+        
+    
+  
 
   
   
