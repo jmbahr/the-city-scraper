@@ -360,6 +360,8 @@ window.onload = wrap_img;
                                <span class="n">x</span><span class="p">[</span><span class="s1">'B15003_014E'</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="s1">'B15003_015E'</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="s1">'B15003_016E'</span><span class="p">],</span>
             <span class="n">total_educ</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">'B15003_001E'</span><span class="p">],</span>
             <span class="n">pct_nohs</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s1">'n_nohs'</span><span class="p">]</span> <span class="o">/</span> <span class="n">x</span><span class="p">[</span><span class="s1">'total_educ'</span><span class="p">])</span>
+
+<span class="n">census_derived_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s2">"../data/census_derived_df.csv"</span><span class="p">)</span>
 </pre></div>
 
     </div>
